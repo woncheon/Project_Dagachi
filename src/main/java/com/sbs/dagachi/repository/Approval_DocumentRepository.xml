@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sbs.dagachi.repository.Approval_DocumentRepository">
+
+	<insert id="insertA_document" parameterType="Approval_Document">
+		INSERT INTO APPROVAL_DOCUMENT
+		SET approval_title = #{approval_title},
+		approval_content =#{approval_content},
+		approval_register=#{approval_register},
+		approval_registdate=NOW(),
+		approval_updatedate=NOW(),
+		approval_appdate=#{approval_appdate},
+		approval_status=#{approval_status},
+		approval_save=#{approval_save},
+		approval_attach=#{approval_attach},
+		form_id=#{form_id},
+		approval_approver1=#{approval_approver1},
+		approval_approver2=#{approval_approver2},
+		approval_lastapprover=#{approval_lastapprover},
+		approval_level=#{approval_level}
+	
+	</insert>
+
+
+	<update id="updataA_status" >
+		UPDATE APPROVAL_DOCUMENT
+		SET approval_appdate = NOW(),
+		    approval_status = #{approval_status}
+		WHERE approval_id = #{approval_id}
+	</update>
+   <select id="getA_documentListByRegister" resultType="Approval_Document">
+   		SELECT *
+		FROM APPROVAL_DOCUMENT
+		WHERE approval_register = #{approval_register}  
+		  <if test="save == 1">
+		    AND approval_save != 2
+		  </if>
+		  <if test="save == 2">
+		    AND approval_save = 2
+		  </if>
+		  <if test="st=='title'">
+		    AND approval_title LIKE CONCAT('%', #{sk}, '%')
+		  </if>
+		   <if test ='status=="0"'>
+   		AND approval_status = 0
+   		 </if>
+   		 <if test ='status=="1"'>
+   		AND approval_status = 1
+   		 </if>
+   		 <if test ='status=="2"'>
+   		AND approval_status = 2
+   		 </if>
+	     ORDER BY 
+         CASE WHEN approval_level = 1 THEN 0 ELSE 1 END,
+         approval_registdate DESC
+	    <if test="limitTake != -1">
+			LIMIT #{limitStart}, #{limitTake}
+		</if>
+
+   </select>
+	
+	<select id="getReceiveA_documentListByApprover" resultType="Approval_Document">
+		SELECT *
+		FROM APPROVAL_DOCUMENT
+		WHERE (approval_approver1 =#{approval_approver} OR approval_approver2 =#{approval_approver} OR approval_lastapprover=#{approval_approver}) AND approval_save != 2  		
+		<if test ="st=='title'">
+   		AND approval_title LIKE CONCAT('%', #{sk}, '%') 
+   		 </if>
+   		  <if test ='status=="0"'>
+   		AND approval_status = 0
+   		 </if>
+   		 <if test ='status=="1"'>
+   		AND approval_status = 1
+   		 </if>
+   		 <if test ='status=="2"'>
+   		AND approval_status = 2
+   		 </if>
+	     ORDER BY 
+         CASE WHEN approval_level = 1 THEN 0 ELSE 1 END,
+         approval_registdate DESC
+	    <if test="limitTake != -1">
+			LIMIT #{limitStart}, #{limitTake}
+		</if>
+	</select>
+	<select id="CountSaveDocument" resultType="int">
+	SELECT COUNT(*) AS count
+	FROM approval_document
+	WHERE approval_register = #{approval_register} AND approval_save = 2;
+	</select>
+	<select id="CountA_documentListByRegister" resultType="int">
+	SELECT COUNT(*) AS count
+	FROM APPROVAL_DOCUMENT
+   		WHERE approval_register = #{approval_register}  
+   		<if test ="save == 1">
+   		AND approval_save != 2
+   		</if>
+   		<if test ="save == 2">
+   		AND approval_save = 2
+   		</if>
+   		<if test ="st=='title'">
+   		AND approval_title LIKE CONCAT('%', #{sk}, '%')
+   		 </if>
+   		 <if test ='status=="0"'>
+   		AND approval_status = 0
+   		 </if>
+   		 <if test ='status=="1"'>
+   		AND approval_status = 1
+   		 </if>
+   		 <if test ='status=="2"'>
+   		AND approval_status = 2
+   		 </if>
+	</select>
+	<select id="CountReceiveA_documentListByApprover" resultType="int">
+	 SELECT COUNT(*) AS count
+	 FROM APPROVAL_DOCUMENT
+	 WHERE (approval_approver1 =#{approval_approver} OR approval_approver2 =#{approval_approver} OR approval_lastapprover=#{approval_approver}) AND approval_save != 2  		
+		<if test ="st=='title'">
+   		AND approval_title LIKE CONCAT('%', #{sk}, '%') 
+   		 </if>
+   		  <if test ='status=="0"'>
+   		AND approval_status = 0
+   		 </if>
+   		 <if test ='status=="1"'>
+   		AND approval_status = 1
+   		 </if>
+   		 <if test ='status=="2"'>
+   		AND approval_status = 2
+   		 </if>
+	
+	</select>
+	
+	
+	<select id="getA_document" resultType="Approval_Document">
+	SELECT *
+	FROM APPROVAL_DOCUMENT
+	WHERE approval_id= #{approval_id}
+	
+	</select>
+
+
+
+
+
+</mapper>

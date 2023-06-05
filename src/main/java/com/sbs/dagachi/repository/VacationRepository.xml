@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.sbs.dagachi.repository.VacationRepository">
+
+<select id="getTotalYear" resultType="Integer">
+	SELECT COALESCE(SUM(year_vacation_count), 0) AS total_count
+	FROM vacation
+	LEFT JOIN MEMBER AS M ON vacation_member = M.MEMBER_ID
+	WHERE vacation_member = #{vacation_member}
+
+</select>
+
+<select id="getDelYear" resultType="int">
+	SELECT  COALESCE(SUM(del_year_vacation_count),0) AS total_count
+	FROM vacation
+	LEFT JOIN MEMBER AS M ON vacation_member = M.MEMBER_ID
+	WHERE vacation_member = #{vacation_member}
+</select>
+
+<select id="getTotalMonth" resultType="int">
+	SELECT COALESCE(SUM(month_vacation_count),0) AS total_count
+	FROM vacation
+	LEFT JOIN MEMBER AS M ON vacation_member = M.MEMBER_ID
+	WHERE
+	vacation_member = #{vacation_member}
+</select>
+
+<select id="getDelMonth" resultType="int">
+	SELECT  COALESCE(SUM(del_month_vacation_count),0) AS total_count
+	FROM vacation
+	LEFT JOIN MEMBER AS M ON vacation_member = M.MEMBER_ID
+	WHERE vacation_member = #{vacation_member}
+</select>
+
+<select id="getVacation" resultType="vacation">
+	SELECT *
+	FROM vacation
+	LEFT JOIN MEMBER AS M ON vacation_member = M.MEMBER_ID
+	WHERE vacation_member = #{vacation_member}
+</select>
+
+
+
+
+</mapper> 

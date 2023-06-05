@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.sbs.dagachi.repository.AttendenceRepository">
+
+<select id="getForPrintAttendence" resultType="Attendence">
+    SELECT A.*,
+    M.MEMBER_ID AS ATTENDENCE_MEMBER
+    FROM ATTENDANCE AS A
+    LEFT JOIN MEMBER AS M
+    ON A.ATTENDENCE_MEMBER = M.MEMBER_ID
+    LEFT JOIN TEAM AS T
+    ON M.MEMBER_TEAM = T.TEAM_ID
+    LEFT JOIN DEPARTMENT AS D
+    ON M.MEMBER_DEPARTMENT = D.DEPARTMENT_ID
+    <if test="searchKeyword != ''">
+        WHERE (
+            <choose>
+                <when test="searchKeywordTypeCode == 'attendence_status'">
+                     CASE
+                        WHEN A.ATTENDENCE_STATUS = '1' THEN '출근'
+                        WHEN A.ATTENDENCE_STATUS = '2' THEN '퇴근'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'attendence_regDate'">
+                    A.ATTENDENCE_REGDATE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'team_name'">
+                    T.TEAM_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'department_name'">
+                    CASE
+                        WHEN D.DEPARTMENT_NAME = '1' THEN '인사'
+                        WHEN D.DEPARTMENT_NAME = '2' THEN '마케팅'
+                        WHEN D.DEPARTMENT_NAME = '3' THEN '영업'
+                        WHEN D.DEPARTMENT_NAME = '4' THEN '관리'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    A.ATTENDENCE_STATUS LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR A.ATTENDENCE_REGDATE LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR T.TEAM_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR D.DEPARTMENT_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+    ORDER BY A.ATTENDENCE_REGDATE DESC
+    <if test="limitTake != -1">
+        LIMIT #{limitStart}, #{limitTake}
+    </if>
+</select>
+
+<select id="getForPrintMyAttendence" resultType="Attendence">
+    SELECT A.*,
+    M.MEMBER_ID AS ATTENDENCE_MEMBER
+    FROM ATTENDANCE AS A
+    LEFT JOIN MEMBER AS M
+    ON A.ATTENDENCE_MEMBER = M.MEMBER_ID
+    LEFT JOIN TEAM AS T
+    ON M.MEMBER_TEAM = T.TEAM_ID
+    LEFT JOIN DEPARTMENT AS D
+    ON M.MEMBER_DEPARTMENT = D.DEPARTMENT_ID
+    WHERE M.MEMBER_ID = #{attendence_member}
+    <if test="searchKeyword != ''">
+        AND (
+            <choose>
+                <when test="searchKeywordTypeCode == 'attendence_status'">
+                     CASE
+                        WHEN A.ATTENDENCE_STATUS = '1' THEN '출근'
+                        WHEN A.ATTENDENCE_STATUS = '2' THEN '퇴근'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'attendence_regDate'">
+                    A.ATTENDENCE_REGDATE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'team_name'">
+                    T.TEAM_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'department_name'">
+                   CASE
+                        WHEN D.DEPARTMENT_NAME = '1' THEN '인사'
+                        WHEN D.DEPARTMENT_NAME = '2' THEN '마케팅'
+                        WHEN D.DEPARTMENT_NAME = '3' THEN '영업'
+                        WHEN D.DEPARTMENT_NAME = '4' THEN '관리'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    A.ATTENDENCE_STATUS LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR A.ATTENDENCE_REGDATE LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR T.TEAM_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR D.DEPARTMENT_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+    ORDER BY A.ATTENDENCE_REGDATE DESC
+    <if test="limitTake != -1">
+        LIMIT #{limitStart}, #{limitTake}
+    </if>
+</select>
+
+<select id="getAttendenceCount" resultType="int">
+    SELECT COUNT(*) AS cnt
+    FROM ATTENDANCE AS A
+    <if test="searchKeyword != ''">
+        WHERE (
+            <choose>
+                <when test="searchKeywordTypeCode == 'attendence_status'">
+                     CASE
+                        WHEN A.ATTENDENCE_STATUS = '1' THEN '출근'
+                        WHEN A.ATTENDENCE_STATUS = '2' THEN '퇴근'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'attendence_regDate'">
+                    A.ATTENDENCE_REGDATE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    A.ATTENDENCE_STATUS LIKE CONCAT('%', #{searchKeyword}, '%') OR A.ATTENDENCE_REGDATE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+</select>
+
+<select id="getMyAttendenceCount" resultType="int">
+    SELECT COUNT(*) AS cnt
+    FROM ATTENDANCE AS A
+    WHERE A.ATTENDENCE_MEMBER = #{attendence_member}
+    <if test="searchKeyword != ''">
+        AND (
+            <choose>
+                <when test="searchKeywordTypeCode == 'attendence_status'">
+                     CASE
+                        WHEN A.ATTENDENCE_STATUS = '1' THEN '출근'
+                        WHEN A.ATTENDENCE_STATUS = '2' THEN '퇴근'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'attendence_regDate'">
+                    A.ATTENDENCE_REGDATE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    A.ATTENDENCE_STATUS LIKE CONCAT('%', #{searchKeyword}, '%') OR A.ATTENDENCE_REGDATE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+</select>
+
+
+<select id="getDepartmentTotal" resultType="map">
+SELECT 
+    CASE m.member_department
+        WHEN 1 THEN '인사'
+        WHEN 2 THEN '마케팅'
+        WHEN 3 THEN '영업'
+        WHEN 4 THEN '관리'
+    END AS department,
+     m.member_team
+   AS team,
+    COUNT(*) AS total_count
+FROM MEMBER AS m
+GROUP BY m.member_department
+</select>
+
+<select id="getDepartmentTotalCount" resultType="int">
+SELECT COUNT(*) AS list_count
+FROM (
+    SELECT 
+        a.attendence_regdate,
+        CASE m.member_department
+            WHEN 1 THEN '인사'
+            WHEN 2 THEN '마케팅'
+            WHEN 3 THEN '영업'
+            WHEN 4 THEN '관리'
+        END AS department,
+        COUNT(*) AS total_count
+    FROM MEMBER AS m
+    INNER JOIN attendance AS a ON m.member_id = a.attendence_member
+    WHERE a.attendence_status = 1
+    <if test="searchKeyword != ''">
+        AND (
+           <choose>
+                <when test="searchKeywordTypeCode == 'attendence_status'">
+                     CASE
+                        WHEN A.ATTENDENCE_STATUS = '1' THEN '출근'
+                        WHEN A.ATTENDENCE_STATUS = '2' THEN '퇴근'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'attendence_regDate'">
+                    DATE_FORMAT(a.attendence_regdate, '%Y-%m-%d') LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                  <when test="searchKeywordTypeCode == 'member_department'">
+                    CASE
+                        WHEN  a.member_department = '1' THEN '인사'
+                        WHEN  a.member_department = '2' THEN '마케팅'
+                        WHEN  a.member_department = '3' THEN '영업'
+                        WHEN  a.member_department = '4' THEN '관리'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                 <when test="searchKeywordTypeCode == 'member_team'">
+                    a.member_team LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>                <otherwise>
+                    a.attendence_status LIKE CONCAT('%', #{searchKeyword}, '%') OR DATE_FORMAT(a.attendence_regdate, '%Y-%m-%d') LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+    GROUP BY a.attendence_regdate, m.member_department
+    ORDER BY a.attendence_regdate desc
+) AS LIST;
+
+
+</select>
+
+
+<select id="getDepartmentTodayTotal" resultType="map">
+SELECT 
+    a.attendence_regdate,
+    CASE m.member_department
+        WHEN 1 THEN '인사'
+        WHEN 2 THEN '마케팅'
+        WHEN 3 THEN '영업'
+        WHEN 4 THEN '관리'
+    END AS department,
+    COUNT(*) AS total_count
+FROM MEMBER AS m
+INNER JOIN attendance AS a ON m.member_id = a.attendence_member
+WHERE a.attendence_status = 1 
+   <if test="searchKeyword != ''">
+        AND (
+            <choose>
+                <when test="searchKeywordTypeCode == 'attendence_status'">
+                     CASE
+                        WHEN A.ATTENDENCE_STATUS = '1' THEN '출근'
+                        WHEN A.ATTENDENCE_STATUS = '2' THEN '퇴근'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'attendence_regDate'">
+                    DATE_FORMAT(a.attendence_regdate, '%Y-%m-%d') LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                  <when test="searchKeywordTypeCode == 'member_department'">
+                     CASE
+                        WHEN  a.member_department = '1' THEN '인사'
+                        WHEN  a.member_department = '2' THEN '마케팅'
+                        WHEN  a.member_department = '3' THEN '영업'
+                        WHEN  a.member_department = '4' THEN '관리'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                 <when test="searchKeywordTypeCode == 'member_team'">
+                    a.member_team LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>                <otherwise>
+                    a.attendence_status LIKE CONCAT('%', #{searchKeyword}, '%') OR DATE_FORMAT(a.attendence_regdate, '%Y-%m-%d') LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+GROUP BY a.attendence_regdate, m.member_department
+ORDER BY a.attendence_regdate desc
+ <if test="limitTake != -1">
+        LIMIT #{limitStart}, #{limitTake}
+    </if>
+</select>
+
+<select id="getTeamTodayTotal" resultType="map">
+
+SELECT a.attendence_regdate,
+    CASE m.member_department 
+        WHEN 1 THEN '인사'
+        WHEN 2 THEN '마케팅'
+        WHEN 3 THEN '영업'
+        WHEN 4 THEN '관리'
+    END AS department,
+     m.member_team
+   AS team,
+    COUNT(DISTINCT m.member_id) AS team_count
+FROM MEMBER AS m
+INNER JOIN ATTENDANCE AS a ON m.member_id = a.attendence_member
+WHERE a.attendence_status = 1 
+<if test="searchKeyword != ''">
+        AND (
+            <choose>
+                <when test="searchKeywordTypeCode == 'attendence_status'">
+                    CASE
+                        WHEN A.ATTENDENCE_STATUS = '1' THEN '출근'
+                        WHEN A.ATTENDENCE_STATUS = '2' THEN '퇴근'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'attendence_regDate'">
+                    DATE_FORMAT(a.attendence_regdate, '%Y-%m-%d') LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                  <when test="searchKeywordTypeCode == 'member_department'">
+                    CASE
+                        WHEN  a.member_department = '1' THEN '인사'
+                        WHEN  a.member_department = '2' THEN '마케팅'
+                        WHEN  a.member_department = '3' THEN '영업'
+                        WHEN  a.member_department = '4' THEN '관리'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                 <when test="searchKeywordTypeCode == 'member_team'">
+                    a.member_team LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>                <otherwise>
+                    a.attendence_status LIKE CONCAT('%', #{searchKeyword}, '%') OR DATE_FORMAT(a.attendence_regdate, '%Y-%m-%d') LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+GROUP BY a.attendence_regdate, m.member_department, m.member_team
+ORDER BY a.attendence_regdate desc, m.member_department, m.member_team
+<if test="limitTake != -1">
+        LIMIT #{limitStart}, #{limitTake}
+    </if>
+
+</select>
+
+
+<select id="getTeamtotal" resultType="map">
+SELECT 
+    CASE m.member_department
+        WHEN 1 THEN '인사'
+        WHEN 2 THEN '마케팅'
+        WHEN 3 THEN '영업'
+        WHEN 4 THEN '관리'
+    END AS department,
+      m.member_team
+      AS team,
+    COUNT(DISTINCT m.member_id) AS team_count
+FROM MEMBER AS m
+WHERE m.member_department = #{member_department}
+GROUP BY m.member_department, m.member_team
+ORDER BY m.member_department, m.member_team;
+
+</select>
+
+
+
+
+<select id="getTeamlistCount" resultType="int">
+SELECT COUNT(*) AS list_count
+FROM (
+    SELECT A.ATTENDENCE_REGDATE,
+        CASE m.member_department 
+            WHEN 1 THEN '인사'
+            WHEN 2 THEN '마케팅'
+            WHEN 3 THEN '영업'
+            WHEN 4 THEN '관리'
+        END AS department,
+         m.member_team
+           AS team,
+        COUNT(DISTINCT m.member_id) AS team_count
+    FROM MEMBER AS m
+    INNER JOIN ATTENDANCE AS A ON m.member_id = a.attendence_member
+    WHERE a.attendence_status = 1
+   <if test="searchKeyword != ''">
+        AND (
+            <choose>
+                <when test="searchKeywordTypeCode == 'attendence_status'">
+                    CASE
+                        WHEN A.ATTENDENCE_STATUS = '1' THEN '출근'
+                        WHEN A.ATTENDENCE_STATUS = '2' THEN '퇴근'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'attendence_regDate'">
+                    DATE_FORMAT(a.attendence_regdate, '%Y-%m-%d') LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                  <when test="searchKeywordTypeCode == 'member_department'">
+                     CASE
+                        WHEN  a.member_department = '1' THEN '인사'
+                        WHEN  a.member_department = '2' THEN '마케팅'
+                        WHEN  a.member_department = '3' THEN '영업'
+                        WHEN  a.member_department = '4' THEN '관리'
+                    END
+                    LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                 <when test="searchKeywordTypeCode == 'member_team'">
+                    a.member_team LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>                <otherwise>
+                    a.attendence_status LIKE CONCAT('%', #{searchKeyword}, '%') OR DATE_FORMAT(a.attendence_regdate, '%Y-%m-%d') LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+    GROUP BY a.attendence_regdate, m.member_department, m.member_team
+    ORDER BY a.attendence_regdate desc, m.member_department, m.member_team
+) AS LIST;
+
+</select>
+
+<select id="getTotalWorkDay" resultType="map">
+SELECT 
+  t.team_id, 
+  COUNT(
+    CASE
+      WHEN DAYOFWEEK(a.attendence_regdate) NOT IN (1, 7) AND a.attendence_status = 1
+      THEN 1
+    END
+  ) AS total_work_days
+FROM 
+  MEMBER m 
+  INNER JOIN team t ON m.member_team = t.team_id
+  INNER JOIN attendance a ON m.member_id = a.attendence_member
+WHERE 
+  a.attendence_regdate BETWEEN DATE_FORMAT(NOW(), '%Y-%m-01') AND NOW() 
+  AND m.member_department = #{member_department}
+GROUP BY 
+  t.team_id
+</select>
+
+
+<select id="getTodayTeamStatusCount" resultType="int">
+SELECT SUM(team_count) AS total_team_count
+FROM (
+    SELECT a.attendence_regdate,
+        CASE m.member_department 
+            WHEN 1 THEN '인사'
+            WHEN 2 THEN '마케팅'
+            WHEN 3 THEN '영업'
+            WHEN 4 THEN '관리'
+        END AS department,
+         m.member_team
+            AS team,
+        COUNT(DISTINCT m.member_id) AS team_count
+    FROM MEMBER AS m
+    INNER JOIN ATTENDANCE AS a ON m.member_id = a.attendence_member
+    WHERE a.attendence_status = 1
+    AND m.member_department = #{member_department}
+    GROUP BY m.member_department, m.member_team
+) AS team_counts;
+
+</select>
+
+<select id="getTodayTeamStatus7Count" resultType="int">
+SELECT COALESCE(SUM(team_count), 0) AS total_team_count
+FROM (
+    SELECT a.attendence_regdate,
+        CASE m.member_department 
+            WHEN 1 THEN '인사'
+            WHEN 2 THEN '마케팅'
+            WHEN 3 THEN '영업'
+            WHEN 4 THEN '관리'
+        END AS department,
+         m.member_team
+           AS team,
+        COUNT(DISTINCT m.member_id) AS team_count
+    FROM MEMBER AS m
+    INNER JOIN ATTENDANCE AS a ON m.member_id = a.attendence_member
+    WHERE a.attendence_status = 1
+    AND m.member_department = #{member_department}
+    AND a.attendence_regdate > '09:00:00'
+    AND a.attendence_regdate &lt;  '18:00:00'
+    GROUP BY m.member_department, m.member_team
+) AS team_counts;
+
+</select>
+
+
+<select id="getTeamTotalCount" resultType="int">
+SELECT COALESCE(SUM(team_count), 0) AS total_team_count
+FROM (
+    SELECT 
+        CASE m.member_department
+            WHEN 1 THEN '인사'
+            WHEN 2 THEN '마케팅'
+            WHEN 3 THEN '영업'
+            WHEN 4 THEN '관리'
+        END AS department,
+         m.member_team
+            AS team,
+        COUNT(DISTINCT m.member_id) AS team_count
+    FROM MEMBER AS m
+    WHERE m.member_department = #{member_department}
+    GROUP BY m.member_department, m.member_team
+) AS team_counts;
+</select>
+
+<select id="getTodayStatus5Count" resultType="int">
+SELECT COALESCE(SUM(team_count),0) AS total_team_count
+FROM (
+    SELECT a.attendence_regdate,
+        CASE m.member_department 
+            WHEN 1 THEN '인사'
+            WHEN 2 THEN '마케팅'
+            WHEN 3 THEN '영업'
+            WHEN 4 THEN '관리'
+        END AS department,
+        m.member_team
+            AS team,
+        COUNT(DISTINCT m.member_id) AS team_count
+    FROM MEMBER AS m
+    INNER JOIN ATTENDANCE AS a ON m.member_id = a.attendence_member
+    WHERE a.attendence_status IN (5)
+    AND m.member_department = #{member_department}
+    AND a.attendence_regdate > '09:00:00'
+    GROUP BY m.member_department, m.member_team
+) AS team_counts;
+</select>
+
+<select id="getTodaystatus4Count" resultType="int">
+SELECT SUM(team_count) AS total_team_count
+FROM (
+    SELECT a.attendence_regdate,
+        CASE m.member_department 
+            WHEN 1 THEN '인사'
+            WHEN 2 THEN '마케팅'
+            WHEN 3 THEN '영업'
+            WHEN 4 THEN '관리'
+        END AS department,
+         m.member_team
+            AS team,
+        COUNT(DISTINCT m.member_id) AS team_count
+    FROM MEMBER AS m
+    INNER JOIN ATTENDANCE AS a ON m.member_id = a.attendence_member
+    WHERE a.attendence_status IN (4,6) 
+    AND m.member_department = #{member_department}
+    GROUP BY m.member_department, m.member_team
+) AS team_counts;
+</select>
+
+<select id="getTeamDetail" resultType="map">
+ SELECT 
+  m.member_name, 
+  m.member_rank, 
+  a.attendence_regdate, 
+  a.attendence_status, 
+  a.attendence_reason
+FROM 
+  MEMBER m 
+  INNER JOIN attendance a ON m.member_id = a.attendence_member
+WHERE 
+  m.member_department = #{member_department}
+  AND m.member_team = #{member_team}
+  AND DATE_FORMAT(a.attendence_regdate, '%Y-%m-%d') = #{attendence_regDate}
+GROUP BY 
+  m.member_name, 
+  m.member_rank, 
+  a.attendence_regdate, 
+  a.attendence_status, 
+  a.attendence_reason;
+
+</select>
+
+<select id="getMemberNameTotalStatus" resultType="int">
+SELECT COALESCE(SUM(attendence_status), 0) 
+FROM attendance 
+WHERE attendence_member = (SELECT member_id FROM MEMBER WHERE member_name = #{member_name}) 
+AND attendence_status = 1;
+</select>
+
+<select id="getMemberNameTotalStatus7Count" resultType="int">
+SELECT COALESCE(SUM(attendence_status), 0) 
+FROM attendance 
+WHERE attendence_member = (SELECT member_id FROM MEMBER WHERE member_name = #{member_name}) 
+AND attendence_status = 1
+AND attendence_regdate BETWEEN '09:00:00' AND '18:00:00';
+</select>
+
+<select id="getMemberNameTotalStatus5Count" resultType="int">
+SELECT IFNULL(COUNT(*), 0)
+FROM attendance 
+WHERE attendence_member = (SELECT member_id FROM MEMBER WHERE member_name = #{member_name}) 
+AND attendence_status = 5;
+</select>
+
+<select id="getMemberNameTotalList" resultType="map">
+ SELECT 
+  attendence_regdate,
+  IF(TIME(attendence_regdate) &lt;= '09:00:00', DATE_FORMAT(attendence_regdate, '%H:%i:%s'), '00:00:00') AS '출근시간',
+  IF(TIME(attendence_regdate) > '09:00:00' AND TIME(attendence_regdate) &lt;= '18:00:00', DATE_FORMAT(attendence_regdate, '%H:%i:%s'), '00:00:00') AS '퇴근시간',
+  attendence_status AS '근태상태'
+FROM attendance 
+WHERE 
+  attendence_member = (SELECT member_id FROM MEMBER WHERE member_name = #{member_name}) 
+  AND TIME(attendence_regdate) >= '09:00:00' 
+  AND TIME(attendence_regdate) &lt;= '18:00:00' 
+  AND attendence_status IN (1, 2, 3, 4, 5, 6, 7)
+</select>
+
+<insert id="attendenceInsert" parameterType="map">
+    INSERT INTO attendance
+    SET
+    attendence_member = #{attendence_member},
+    attendence_status = #{attendence_status},
+    attendence_month_vacation_cnt = #{attendence_month_vacation_cnt},
+    attendence_year_vacation_cnt = #{attendence_year_vacation_cnt},
+    attendence_regdate = now(),
+    member_department = #{member_department},
+    member_team = #{member_team}
+</insert>
+	
+</mapper> 

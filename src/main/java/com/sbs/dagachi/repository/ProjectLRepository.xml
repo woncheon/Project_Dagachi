@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.sbs.dagachi.repository.ProjectLRepository">
+
+	<select id="getPLlistByTeam" resultType="ProjectL">
+		select *
+		from project_L
+		where pl_team=#{pl_team}	
+	</select>
+	
+	
+	<update id="moveAnotherTeam">
+		update project_L
+		set
+		pl_team=#{teamName}
+		where pl_id=#{pl_id}
+	</update>
+	
+	<insert id="registPL">
+		insert into project_L
+		set
+		pl_name=#{pl_name}, pl_kind_status=0, pl_startDate=now(), pl_endDate=#{pl_endDate},pl_register=#{pl_register}, pl_manager=#{pl_manager}, pl_team=#{pl_team}
+	</insert>
+	
+	<select id="getTeamName" resultType="String">
+		select pl_team
+		from project_L
+		where pl_Id=#{pl_Id}
+	</select>
+	
+	<delete id="removePl">
+		delete
+		from project_L
+		where pl_Id=#{pl_Id}
+	</delete>
+	
+	<select id="getPLByPLId" resultType="ProjectL">
+		select *
+		from project_L
+		where PL_ID=#{pl_Id}
+	</select>
+	
+	<select id="getLastInsertedId" resultType="int">
+		SELECT LAST_INSERT_ID(); 
+	</select>
+</mapper>

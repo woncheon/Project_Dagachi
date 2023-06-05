@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.sbs.dagachi.repository.ReservationRepository">
+
+<select id="getForPrintReservations" resultType="Reservation">
+    SELECT R.*,
+    M.MEMBER_ID AS RESERVATION_MEMBER
+    FROM RESERVATION AS R
+    LEFT JOIN MEMBER AS M
+    ON R.RESERVATION_MEMBER = M.MEMBER_ID
+    <if test="searchKeyword != ''">
+        WHERE (
+            <choose>
+                <when test="searchKeywordTypeCode == 'reservation_member'">
+                    R.RESERVATION_MEMBER LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'room_code'">
+                    R.ROOM_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    R.RESERVATION_MEMBER LIKE CONCAT('%', #{searchKeyword}, '%') OR R.ROOM_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+    ORDER BY R.RESERVATION_REGTIME DESC
+    <if test="limitTake != -1">
+        LIMIT #{limitStart}, #{limitTake}
+    </if>
+</select>
+
+<select id="getReservations" resultType="Reservation">
+    SELECT R.*,
+    M.MEMBER_ID AS RESERVATION_MEMBER
+    FROM RESERVATION AS R
+    LEFT JOIN MEMBER AS M
+    ON R.RESERVATION_MEMBER = M.MEMBER_ID
+    <if test="searchKeyword != ''">
+        WHERE (
+            <choose>
+                <when test="searchKeywordTypeCode == 'reservation_member'">
+                    R.RESERVATION_MEMBER LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'room_code'">
+                    R.ROOM_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    R.RESERVATION_MEMBER LIKE CONCAT('%', #{searchKeyword}, '%') OR R.ROOM_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+    ORDER BY R.RESERVATION_REGTIME DESC
+</select>
+
+
+<select id="getReservationCount" resultType="int">
+    SELECT COUNT(*) AS cnt
+    FROM RESERVATION AS R
+    <if test="searchKeyword != ''">
+        WHERE (
+            <choose>
+                <when test="searchKeywordTypeCode == 'reservation_member'">
+                    R.RESERVATION_MEMBER LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchKeywordTypeCode == 'room_code'">
+                    R.ROOM_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    R.RESERVATION_MEMBER LIKE CONCAT('%', #{searchKeyword}, '%') OR R.ROOM_CODE LIKE CONCAT('%', #{searchKeyword}, '%')
+                </otherwise>
+            </choose>
+        )
+    </if>
+</select>
+
+
+
+
+	<insert id="reservationInsert">
+		INSERT INTO reservation
+		SET room_code = #{room_code},
+		reservation_start = #{reservation_start},
+		reservation_end = #{reservation_end},
+		reservation_member = #{reservation_member},
+		reservation_title = #{reservation_title}, 
+		reservation_regtime = NOW()
+		
+	</insert>
+	
+<select id="getReservationforroomname" resultType="reservation">
+ SELECT R.*,
+    M.MEMBER_ID AS RESERVATION_MEMBER
+    FROM RESERVATION AS R
+    LEFT JOIN MEMBER AS M
+    ON R.RESERVATION_MEMBER = M.MEMBER_ID
+    where room_code = #{room_code}
+</select>
+
+<select id="getoverlappingEvents" resultType="reservation">
+SELECT *
+FROM RESERVATION
+WHERE ROOM_CODE=#{room_code}
+AND RESERVATION_START = #{reservation_start}
+AND RESERVATION_END =#{reservation_end}
+</select>
+
+<select id="isOverlappingEvent" resultType="reservation">
+SELECT *
+FROM RESERVATION
+WHERE ROOM_CODE=#{room_code}
+AND RESERVATION_START = #{reservation_start}
+AND RESERVATION_END =#{reservation_end}
+and reservation_code =#{reservation_code}
+</select>
+
+<select id="getReservationsByRoom" resultType="reservation">
+SELECT * FROM RESERVATION WHERE ROOM_CODE = #{room_code}
+</select>
+
+<select id="getReservationsRoom" resultType="reservation">
+SELECT * FROM RESERVATION WHERE ROOM_CODE = #{room_code}
+AND reservation_member != #{reservation_member}
+</select>
+
+<select id="getReservationsByRoomnotloginUser" resultType="reservation">
+SELECT * FROM RESERVATION WHERE ROOM_CODE = #{room_code}
+AND reservation_member != #{reservation_member}
+ AND reservation_code != #{reservation_code}
+</select>
+
+<select id="getEvent" resultType="reservation">
+select * from reservation where reservation_code = #{reservation_code}
+</select>
+
+
+
+<update id="reservationmodify" >
+UPDATE reservation
+SET room_code = #{room_code},
+    reservation_start = #{reservation_start},
+    reservation_end = #{reservation_end},
+    reservation_title = #{reservation_title}
+WHERE reservation_code = #{reservation_code};
+</update>
+
+<update id="delete">
+DELETE 
+FROM reservation
+ WHERE reservation_code = #{reservation_code}
+</update>
+	
+</mapper> 

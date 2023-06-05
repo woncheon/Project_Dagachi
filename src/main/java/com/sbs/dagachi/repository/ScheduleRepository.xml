@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sbs.dagachi.repository.ScheduleRepository">
+
+
+
+	<select id="getCalendarList" resultType="ScheduleVO">
+		SELECT *
+		FROM schedule
+	</select>
+
+	<select id="getCommonSchedule" resultType="ScheduleVO">
+		SELECT s.*
+		FROM SCHEDULE AS s
+		WHERE s.schedule_Type = '1'
+	</select>
+
+	<select id="getPersonalSchedule" resultType="ScheduleVO">
+		SELECT s.*
+		FROM
+		schedule AS s
+		where s.schedule_Type = 2 and
+		s.schedule_register = #{schedule_register}
+	</select>
+	
+
+	<insert id="registSchedule">
+		INSERT INTO schedule
+		SET schedule_RegDate = NOW(),
+		schedule_Name = #{schedule_name},
+		schedule_Body = #{schedule_body},
+		schedule_StartDate = #{schedule_start},
+		schedule_EndDate = #{schedule_end},
+		schedule_register = #{register},
+		schedule_Type = #{type}
+	</insert>
+
+	<update id="updateSchedule">
+		UPDATE schedule
+		<set>
+			schedule_Name = #{schedule_name},
+			schedule_Body = #{schedule_body},
+			schedule_StartDate = #{start},
+			schedule_EndDate = #{end}
+		</set>
+		WHERE schedule_Code = #{schedule_code}
+	</update>
+
+	<update id="deleteSchedule">
+		DELETE FROM schedule
+		where schedule_Code = #{schedule_code}
+	</update>
+
+
+
+
+</mapper> 

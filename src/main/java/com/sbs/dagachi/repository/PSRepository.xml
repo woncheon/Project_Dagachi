@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.sbs.dagachi.repository.PSRepository">
+	
+	<insert id="registPs">
+		insert into Project_s
+		set
+		ps_title=#{ps_Title},
+		ps_sender=#{ps_Sender},
+		ps_receiver=#{ps_Receiver},
+		ps_SendDate=#{ps_SendDate},
+		ps_EndDate=#{ps_EndDate},
+		ps_Status=0,
+		pm_Id=#{pm_Id}
+	</insert>
+	
+	<select id="getPSListWait" resultType="PS">
+		SELECT s.*, l.pl_name AS extra_pl_name
+		FROM project_s AS s, project_m AS m, project_l AS l
+		WHERE s.pm_id=m.pm_id AND m.pl_id=l.pl_id AND s.ps_status=0 and ps_receiver=#{ps_Receiver};
+	</select>
+	<select id="getPSListDoing" resultType="PS">
+		SELECT s.*, l.pl_name AS extra_pl_name
+		FROM project_s AS s, project_m AS m, project_l AS l
+		WHERE s.pm_id=m.pm_id AND m.pl_id=l.pl_id AND s.ps_status=1 and ps_receiver=#{ps_Receiver};
+	</select>
+	<select id="getPSListComplete" resultType="PS">
+		SELECT s.*, l.pl_name AS extra_pl_name
+		FROM project_s AS s, project_m AS m, project_l AS l
+		WHERE s.pm_id=m.pm_id AND m.pl_id=l.pl_id AND s.ps_status=2 and ps_receiver=#{ps_Receiver};
+	</select>
+	<select id="getPSListCancel" resultType="PS">
+		SELECT s.*, l.pl_name AS extra_pl_name
+		FROM project_s AS s, project_m AS m, project_l AS l
+		WHERE s.pm_id=m.pm_id AND m.pl_id=l.pl_id AND s.ps_status=3 and ps_receiver=#{ps_Receiver};
+	</select>
+	
+	
+	<update id="modifyPs">
+		update project_s
+		set ps_status=#{stat}
+		where ps_id=#{ps_id}
+	</update>
+	
+	<select id="getPSByPmId" resultType="PS">
+		select *
+		from project_S
+		where pm_id=#{pm_id}
+	</select>
+	
+	<update id="modifyPsUser">
+		update project_s
+		set ps_receiver=#{ps_Receiver}
+		where ps_id=#{ps_id}
+	</update>
+	
+	<select id="getPSListByPmId" resultType="PS">
+		select *
+		from project_S
+		where pm_id=#{pm_id}
+	</select>
+	
+	<select id="getPSByPsId" resultType="PS">
+		select *
+		from project_S
+		where ps_id=#{ps_id}
+	</select>
+	
+	<delete id="removePS">
+		delete
+		from project_s
+		where ps_id=#{ps_id}
+	</delete>
+	
+</mapper>

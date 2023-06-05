@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper	namespace="com.sbs.dagachi.repository.Phone_Book_Repository">
+	<sql id="search">	
+		<if test="searchType == 'name'.toString()">
+			and phone_book_name like concat('%',#{keyword},'%')			
+		</if>
+		<if test="searchType == 'tag'.toString()">
+			and phone_book_tag like concat('%',#{keyword},'%')			
+		</if>
+		<if test="searchType == 'dep'.toString()">
+			and phone_book_dep like concat('%',#{keyword},'%')			
+		</if>			
+	</sql>	
+
+
+	<select id="getPhoneBookList" resultType="Phone_BookVO">
+		select *
+		from phone_book
+		where phone_book_type=#{phone_book_type}
+		<if test="phone_book_type==2">
+			and phone_book_register=#{phone_book_register}
+		</if>
+		<if test="phone_book_type==3">
+			and phone_book_register=#{phone_book_register}
+		</if>
+		<if test="keyword!=''">
+			<choose>
+				<when test="searchType=='dep'">
+					and phone_book_dep like concat('%',#{keyword},'%')
+				</when>
+				<when test="searchType=='tag'">
+					and phone_book_tag like concat('%',#{keyword},'%')
+				</when>
+				<when test="searchType=='name'">
+					and phone_book_name like concat('%',#{keyword},'%')
+				</when>
+			</choose>
+		</if>
+		order by phone_book_name ASC
+		
+		<if test="limitTake!=-1">
+			LIMIT #{limitStart},#{limitTake}
+		</if>
+
+	</select>
+	
+	<select id="phoneBookCount" resultType="int">
+		select count(*)
+		from phone_book
+		where phone_book_type=#{phone_book_type}
+		<if test="phone_book_type==2">
+			and phone_book_register=#{phone_book_register}
+		</if>
+		<if test="phone_book_type==3">
+			and phone_book_register=#{phone_book_register}
+		</if>
+		<if test="keyword!=''">
+			<choose>
+				<when test="searchType=='dep'">
+					and phone_book_dep like concat('%',#{keyword},'%')
+				</when>
+				<when test="searchType=='tag'">
+					and phone_book_tag like concat('%',#{keyword},'%')
+				</when>
+				<when test="searchType=='name'">
+					and phone_book_name like concat('%',#{keyword},'%')
+				</when>
+			</choose>
+		</if>
+		order by phone_book_name ASC
+		
+	</select>
+
+	<select id="getPhoneBookDetail" resultType="Phone_BookVO">
+		select *
+		from phone_book
+		where phone_book_id=#{phone_book_Id}
+	</select>
+
+	<select id="getLastInsertId" resultType="int">
+		SELECT LAST_INSERT_ID() 
+	</select>
+	
+	<select id="getTagList" resultType="String">
+		select distinct phone_book_tag
+		from phone_book
+		
+	</select>
+
+	<insert id="registPhone_Book">
+		insert into phone_Book
+		set
+		phone_book_name=#{phone_Book_Name},
+		phone_book_email=#{phone_Book_Email},
+		phone_book_phone=#{phone_Book_Phone},
+		phone_book_company=#{phone_Book_Company},
+		phone_book_tag=#{phone_Book_Tag},
+		phone_book_fax=#{phone_Book_Fax},
+		phone_book_dep=#{phone_Book_Dep},
+		phone_book_rank=#{phone_Book_Rank},
+		phone_book_address=#{phone_Book_Address},
+		phone_book_web=#{phone_Book_Web},
+		phone_book_register=#{phone_Book_Register},
+		phone_book_type=#{phone_Book_Type}
+
+
+	</insert>
+
+	<update id="modifyPhone_Book">
+		update phone_Book
+		set
+		phone_book_name=#{phone_Book_Name},
+		phone_book_email=#{phone_Book_Email},
+		phone_book_phone=#{phone_Book_Phone},
+		phone_book_company=#{phone_Book_Company},
+		phone_book_tag=#{phone_Book_Tag},
+		phone_book_fax=#{phone_Book_Fax},
+		phone_book_dep=#{phone_Book_Dep},
+		phone_book_rank=#{phone_Book_Rank},
+		phone_book_address=#{phone_Book_Address},
+		phone_book_web=#{phone_Book_Web},
+		phone_book_register=#{phone_Book_Register},
+		phone_book_type=#{phone_Book_Type}
+
+		where phone_book_Id=#{phone_Book_Id}
+	</update>
+	
+	<update id="moveTrashPhone_Book">
+		update phone_Book
+		set phone_Book_Type=3
+		where phone_Book_Id=#{phone_Book_Id}
+	</update>
+	
+	<update id="modifyType">
+		update phone_Book
+		set phone_Book_Type=#{phone_Book_Type}
+		where phone_Book_Id=#{phoneBookId}
+	</update>
+	
+	<delete id="removePhone_Book">
+		delete 
+		from phone_Book
+		where phone_book_Id=#{phone_Book_Id}
+	</delete>
+
+
+</mapper>

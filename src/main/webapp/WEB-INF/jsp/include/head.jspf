@@ -1,0 +1,509 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>dagachi</title>
+
+
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+
+
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/resource/bootstrap/plugins/fontawesome-free/css/all.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" href="/resource/bootstrap/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="/resource/bootstrap/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <!-- JQVMap -->
+  <link rel="stylesheet" href="/resource/bootstrap/plugins/jqvmap/jqvmap.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/resource/bootstrap/dist/css/adminlte.min.css">
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="/resource/bootstrap/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+  <!-- Daterange picker -->
+  <link rel="stylesheet" href="/resource/bootstrap/plugins/daterangepicker/daterangepicker.css">
+  <!-- summernote -->
+  <link rel="stylesheet" href="/resource/bootstrap/plugins/summernote/summernote-bs4.min.css">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.css">
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+<!-- //fullcalendar 언어 설정관련 script -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales-all.js"></script>
+
+   <!-- 제이쿼리 불러오기 -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+   
+   <!-- 테일윈드 불러오기 -->
+   <!-- 노말라이즈, 라이브러리까지 한번에 해결 -->
+
+<body class="hold-transition sidebar-mini layout-fixed " style="margin:0;">
+<!-- <div class="wrapper"> -->
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+
+          <li class="nav-item dropdown">
+        <a class="nav-link" data-toggle="dropdown" href="#">
+         <i class="fas fa-star text-yellow"></i>
+        </a>
+        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right favList">
+           
+        </div>
+      </li>
+     
+ <!-- Notification Menu -->
+        <li class="nav-item dropdown" id="notifications">
+          <a class="nav-link" data-toggle="dropdown" href="#">
+            <i class="far fa-bell"></i>
+            <span class="badge badge-warning navbar-badge cnt"></span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            <div id="notifications_next">알림이없습니다.</div>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item dropdown-footer" onclick="deleteNotifications()">알림 삭제</button>
+          </div>
+          <div class="toastsDefaultBottomRight" style="display:none;"></div>
+          <script type="text/javascript">
+            $(function() {
+              function pollForNotifications() {
+                $.ajax({
+                  url: '/notification/check',
+                  method: 'GET',
+                  success: function(data) {
+                    // data에서 .dropdown-header의 내용 추출
+                    var dropdownHeaderContent = $(data).filter('.dropdown-header').text();
+                    // 정규 표현식을 사용하여 숫자 부분만 추출
+                    var numericContent = dropdownHeaderContent.match(/\d+/g);
+                    // 일치하는 부분이 있으면 사용하고, 그렇지 않으면 '0'으로 기본 설정.
+                    var count = numericContent ? numericContent[0] : '0';
+                    $(".badge.badge-warning.navbar-badge.cnt").html(count);
+                    $("#notifications_next").html(data);
+                  },
+                  error: function(jqXHR, textStatus, errorThrown) {
+                    // Handle error here
+                    console.error("notifications Error occurred: ", textStatus, errorThrown);
+                  }
+                });
+              }
+              pollForNotifications();
+              setInterval(pollForNotifications, 5000);
+            });
+            
+            toastr.options = {
+                   "closeButton": false,
+                   "debug": false,
+                   "newestOnTop": false,
+                   "progressBar": false,
+                   "positionClass": "toast-bottom-right",
+                   "preventDuplicates": false,
+                   "onclick": null,
+                   "showDuration": "300",
+                   "hideDuration": "1000",
+                   "timeOut": "5000",
+                   "extendedTimeOut": "1000",
+                   "showEasing": "swing",
+                   "hideEasing": "linear",
+                   "showMethod": "fadeIn",
+                   "hideMethod": "fadeOut",
+                   "delayOnHover": true
+               }
+
+               $(document).ready(function() {
+                   var closedNotifications = JSON.parse(localStorage.getItem('closedNotifications')) || [];
+
+                   var fetchNotifications = function() {
+                       $.ajax({
+                           url: '/notification/path',
+                           method: 'GET',
+                           success: function(data) {
+                               data.forEach(function(notification) {
+                                   if (!closedNotifications.includes(notification.notification_id)) {
+                                       toastr["info"](notification.notification_body)
+                                       closedNotifications.push(notification.notification_id);
+                                       localStorage.setItem('closedNotifications', JSON.stringify(closedNotifications));
+                                   }
+                               });
+                           },
+                           error: function(jqXHR, textStatus, errorThrown) {
+                               console.error("A notification error occurred: ", textStatus, errorThrown);
+                           }
+                       });
+                   };
+
+                   // Call once at the beginning
+                   fetchNotifications();
+
+                   // Then call every 5 seconds
+                   setInterval(fetchNotifications, 5000); // 5000ms = 5 seconds
+               });
+
+
+
+
+               function deleteNotifications() {
+                 $.ajax({
+                   url: '/notification/delete',
+                   method: 'GET',
+                   success: function(data) {
+                     console.log("삭제 완료");
+                     // 삭제 후 알림 다시 로드
+                     pollForNotifications();
+                   },
+                   error: function(jqXHR, textStatus, errorThrown) {
+                     // 에러 처리
+                     console.error("알림 삭제 오류 발생: ", textStatus, errorThrown);
+                   }
+                 });
+               }
+
+          </script>
+
+        </li>
+    </ul>
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4" style="background-color:#5865F2;">
+    <!-- Brand Logo -->
+      <a href="/usr/home/main" class="brand-link row" style="text-align:center; color:">
+      <span class="text-bold" style="font-size:2rem; border:2px solid; padding:4px; ">多</span>
+      <span class="text-bold" style="font-size: 1.5rem;">dagachi</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar" >
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex flex-wrap" style="background-color:white; justify-content:center;">
+<div id="userimg" class="col-sm-3">
+  <img src="${pageContext.request.contextPath}/common/getPicture?id=${loginUser.member_id}" alt="User Image"
+    style="width: 100%; height: 100%; object-fit: cover; ">
+</div>
+
+
+
+        <div class="info mt-2 " style=" margin-left:15px; ">
+          <div class="d-block" style=font-weight:bold;">${loginUser.member_name } <span style="font-size:0.5rem;">${loginUser.member_rank }</span></div>
+          <div class="d-block" style="">${loginUser.member_department1 }</div>
+         
+         <div class="d-block" style="">
+       <c:if test="${loginUser.member_status eq 1 }">
+       <span class="badge bg-primary">출근</span>
+     </c:if>
+       
+       <c:if test="${loginUser.member_status eq 4 }">
+       <span class="badge bg-waring">연차</span>
+     </c:if>
+       <c:if test="${loginUser.member_status eq 5 }">
+       <span class="badge bg-waring">월차</span>
+     </c:if>
+       <c:if test="${loginUser.member_status eq 3 }">
+       <span class="badge bg-danger">자리비움</span>
+     </c:if>
+</div>
+
+        </div>
+
+       <div class="select-group-wrap" style="display:block; margin-left:15px; margin-top:5px;">
+    <select class="form-control" name="perPageNum" id="perPageNum" onchange="updateMemberStatusDisplay()">
+        <option value="" selected="상태">상태</option>
+        <option value="1">출근</option>
+        <option value="3">자리비움</option>
+    </select>
+</div>
+
+<button onclick="changeStatus(); location.reload();
+" class="btn btn-sidebar" style="margin-left:5px; margin-top:5px; background-color:#e2e2e2; border:none; color:black;">상태변경</button>
+
+<button onclick="logout()" class="btn btn-sidebar" style="margin-left:15px; margin-top:5px; background-color:#e2e2e2; border:none; color:black; width:200px;">로그아웃</button>
+
+      </div>
+
+      <!-- Sidebar Menu -->
+<nav class="mt-2 nav-sidebar" style="margin: 15px;">
+  <div class="accordion nav-item" id="accordion">
+    <div id="card1" style="text-align: center;" >
+      <div class="card-header" id="headingOne">
+        <h2 class="mb-0">
+          <button class="btn btn-link" type="button"
+                  data-toggle="collapse" data-target="#collapse1"
+                  aria-expanded="false" aria-controls="collapse1"
+                  style="color:white;">전자결재</button>
+        </h2>
+      </div>
+      <div id="collapse1" class="collapse"
+           aria-labelledby="headingOne" data-parent="#accordion">
+        <div class="card-body">
+        <div>
+   
+                <a href="/approval/main">메인</a>
+            </div>
+             <div>
+   
+                <a href="/approval/registForm">새 결제 작성</a>
+            </div>
+         <div>
+   
+                <a href="/approval/list?Type=approval&save=1">발신</a>
+            </div>
+           <div>
+                <a href="/approval/list?Type=approver&save=1">수신</a>
+             </div>
+             
+     
+        </div>
+      </div>
+    </div>
+    <div id="card2" style="text-align: center;">
+      <div class="card-header" id="headingTwo">
+        <h2 class="mb-0">
+          <button class="btn btn-link" type="button"
+                  data-toggle="collapse" data-target="#collapse2"
+                  aria-expanded="false" aria-controls="collapse2"
+                  style="color:white;">업무관리</button>
+        </h2>
+      </div>
+      <div id="collapse2" class="collapse"
+           aria-labelledby="headingTwo" data-parent="#accordion">
+        <div class="card-body">
+         <div>
+                <a href="/dagachi/projectL/list">부서별 업무 조회</a>
+      
+            </div>
+             <div>
+ 
+                <a href="/dagachi/projectM/list">팀별 업무 조회</a>
+                
+            </div>
+           <div>
+                <a href="/dagachi/projectS/list">업무 등록 및  수주</a>
+             </div>
+     
+
+        </div>
+      </div>
+    </div>
+    <div id="card3" style="text-align: center;">
+      <div class="card-header" id="headingThree">
+        <h2 class="mb-0">
+          <button class="btn btn-link" type="button"
+                  data-toggle="collapse" data-target="#collapse3"
+                  aria-expanded="false" aria-controls="collapse3"
+                  style="color:white;">일정관리</button>
+        </h2>
+      </div>
+      <div id="collapse3" class="collapse"
+           aria-labelledby="headingThree" data-parent="#accordion">
+        <div class="card-body">
+          <div>
+
+                <a href="/schedule/commonCal">사내일정</a>
+            </div>
+           <div>
+                <a href="/schedule/personalCal">개인일정</a>
+             </div>
+
+        </div>
+      </div>
+    </div>
+    <div id="card4" style="text-align: center;">
+      <div class="card-header" id="headingFour">
+        <h2 class="mb-0">
+          <button class="btn btn-link" type="button"
+                  data-toggle="collapse" data-target="#collapse4"
+                  aria-expanded="false" aria-controls="collapse4"
+                  style="color:white;">커뮤니티</button>
+        </h2>
+      </div>
+    <div id="collapse4" class="collapse"
+           aria-labelledby="headingFour" data-parent="#accordion">
+  <div class="card-body">
+    <div>
+      <a href="/notice/noticeList">공지사항</a>
+    </div>
+    <div>
+      <a href="/article/list">공유 게시판</a>
+    </div>
+     <div id="card8" style="text-align: center;">
+        <div class="card-header" id="headingFive">
+        <a href="/dagachi/proceeding/list">
+            <button class="btn btn-link" type="button"
+                    data-toggle="collapse" data-target="#collapse4"
+                    aria-expanded="false" aria-controls="collapse4"
+                    style="color:white;">회의록</button>
+          </a>
+        </div>
+
+        </div>
+        </div>
+  </div>
+</div>
+
+    </div>
+      <div id="card5" style="text-align: center;">
+      <div class="card-header" id="headingFour">
+        <h2 class="mb-0">
+        <a href="/reservation/list">
+          <button class="btn btn-link" type="button"
+                  data-toggle="collapse" data-target="#collapse5"
+                  aria-expanded="false" aria-controls="collapse5"
+                  style="color:white;">회의실 예약</button>
+        </a>
+        </h2>
+      </div>
+    </div>
+    <div id="card6" style="text-align: center;">
+      <div class="card-header" id="headingFour">
+        <form method="POST" action="/attendence/list">
+        <h2 class="mb-0">
+
+      <input type="hidden"  name="member_id">
+
+        <a href="/attendence/list">
+          <button class="btn btn-link" type="button"
+                  data-toggle="collapse" data-target="#collapse6"
+                  aria-expanded="false" aria-controls="collapse6"
+                  style="color:white;">근태</button>
+        </a></h2>
+        </form>
+      </div>
+    </div>
+   <div id="card7" style="text-align: center;">
+      <div class="card-header" id="headingFour">
+        <h2 class="mb-0">
+          <button class="btn btn-link" type="button"
+                  data-toggle="collapse" data-target="#collapse7"
+                  aria-expanded="false" aria-controls="collapse7"
+                  style="color:white;">주소록</button>
+        </h2>
+      </div>
+      <div id="collapse7" class="collapse"
+           aria-labelledby="headingFour" data-parent="#accordion">
+        <div class="card-body">
+
+           <div>
+                <a href="/dagachi/favPhoneBook/favList">중요주소록</a>
+            </div>
+           <div>
+                <a href="/dagachi/phoneBook/showList?phone_book_type=1">공유주소록</a>
+             </div>
+             <div>
+                <a href="/dagachi/phoneBook/showList?phone_book_type=2">개인주소록</a>
+            </div>
+            <div>
+                <a href="/dagachi/phoneBook/showList?phone_book_type=3">휴지통</a>
+             </div>
+
+        </div>
+      </div>
+    </div>
+     <div id="card8" style="text-align: center;">
+      <div class="card-header" id="headingFour">
+        <h2 class="mb-0">
+          <a href="/dagachi/phoneBook/companyPhoneBookList">
+          <button class="btn btn-link" type="button"
+                  data-toggle="collapse" data-target="#collapse7"
+                  aria-expanded="false" aria-controls="collapse7"
+                  style="color:white;">사내 연락처</button>
+                  </a>
+        </h2>
+      </div>
+      <div id="collapse8" class="collapse"
+           aria-labelledby="headingFour" data-parent="#accordion">
+        <div class="card-body">
+
+           
+
+        </div>
+      </div>
+    </div>
+    </div>
+</nav>
+
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+  
+  <script>
+  function logout() {
+   
+     $.ajax({
+       url: '/common/logout',
+       type: 'GET',
+       data: {
+            attendence_member: '${loginUser.member_id}',
+            member_team: '${loginUser.member_team}',
+            member_department: '${loginUser.member_department}'
+          },
+       success: function(response) {
+        
+         console.log(response);
+         
+        
+         window.location.href = "/common/logout";
+       },
+       error: function(error) {
+         
+         console.log(error);
+         window.location.href = "/common/logout";
+       }
+     });
+   }
+
+</script>
+
+
+
+<script>
+
+
+function changeStatus() {
+    var selectedStatus = $("#perPageNum").val();
+
+    $.ajax({
+        url: "/common/changeStatus",
+        type: "POST",
+        data: {
+            memberStatus: selectedStatus
+        },
+        success: function(response) {
+            console.log(response);
+            
+           
+            
+            location.reload();
+        },
+        error: function(error) {
+            console.log(error);
+            window.location.href = "redirect:/usr/home/main";
+        }
+    });
+}
+
+// Call updateMemberStatusDisplay on page load to initialize the member status display
+$(document).ready(function() {
+    
+});
+/* 
+window.onload=function(){
+      autoOff();
+   } */
+</script>
