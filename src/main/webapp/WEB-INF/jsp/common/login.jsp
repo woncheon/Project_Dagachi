@@ -6,45 +6,25 @@
 <head>
 <!-- 데이지 UI -->
 	<!-- <link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.5/dist/full.css" rel="stylesheet" type="text/css" /> -->
-	
+	<link href="https://cdn.jsdelivr.net/npm/daisyui@3.0.4/dist/full.css" rel="stylesheet" type="text/css" />
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
 .back{
 	
-	 width: 800px; /* body의 너비를 800px로 조절 */
-  height: 600px; /* body의 높이를 600px로 조절 */
-	background-image:url('../resource/img/login.jpg');
+	width: 100%; /* body의 너비를 800px로 조절 */
+  	height: 100vh; /* body의 높이를 600px로 조절 */
+	background-image:url('../resource/img/login-final.jpg');
 	background-repeat:no-repeat;
 	background-position:center;
     background-size:cover;
-}
-.id{
-	font-size:15px;
-	border:0px;
-	border-radius:30px 30px 30px 30px;
-	width:300px; 
-	height:60px; 
-	margin-left:28px; 
-	margin-top:35px;
 
 }
-.pwd{
-	font-size:15px;
-	border:0px;
-	border-radius:30px 30px 30px 30px;
-	width:300px; 
-	height:60px;
-	margin-left:28px;
-	margin-top:30px;
+
+.bg-signature{
+
 }
-.button{
-	width:300px; 
-	height:60px;
-	margin-left:32px;
-	margin-top:20px;
-	border-radius:30px 30px 30px 30px;
-	border:0px;
-	background-color:#5865F2;
-}
+
+
 </style>
 
 
@@ -54,8 +34,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Insert title here</title>
 </head>
-<body class="back">
-	<div style="margin-left:750px;padding-top:100px;width:400px; height:300px;">
+<body class="back flex justify-center items-center">
+	<!-- <div style="margin-left:800px;padding-top:100px;width:400px; height:300px;">
 		<form method="POST" action="dologin">
 		<input type="text"  name="member_id"class="id" placeholder="아이디를 입력하세요.">
 		<input type="password" name="member_pwd"class="pwd" placeholder="비밀번호를 입력하세요.">
@@ -65,7 +45,31 @@
 		</form>
 	     <a href="javascript:window.open('../common/forget', 'dd', 'width=800,height=800');"style="display:block; padding:none;margin-top:20px; margin-left:170px;">아이디/비밀번호 찾기</a>
 	
-	</div>	
+	</div>	 -->
+	<div class="card lg:card-side bg-base-100 shadow-xl h-1/2">
+  <div class="flex justify-center items-center border-r">
+  	<h1 class="font-bold text-6xl p-14 cl-signature">DAGACHI</h1>
+  </div>
+  <div class="card-body">
+    <h2 class="card-title text-3xl cl-signature mb-4">Log-In</h2>
+    <form method="POST" action="dologin">
+		<input type="text" placeholder="아이디를 입력하세요" class="input input-bordered w-80 max-w-xs" />
+		</br>
+		</br>
+		<input type="password" placeholder="비밀번호를 입력하세요" class="input input-bordered w-full max-w-xs" />
+		</br>
+		</br>
+		<div class="p-2">
+			<input type="checkbox">아이디 기억하기</input>
+		</div>
+		<button type="submit" class="btn btn-block btn-primary button">LOGIN</button>
+		</form>
+		
+		<a href="javascript:window.open('../common/forget', 'dd', 'width=800,height=800');">아이디/비밀번호 찾기</a>
+  </div>
+</div>
+	
+	
 
 <script>
 var msg = "${msg}";
